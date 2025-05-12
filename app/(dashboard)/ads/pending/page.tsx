@@ -78,7 +78,7 @@ export default function PendingAdsPage() {
           <CircularProgress />
         </Box>
       ) : (
-        <TableContainer component={Paper}>
+        <TableContainer component={Paper} sx={{whiteSpace: 'nowrap'}}>
           <Table>
             <TableHead>
               <TableRow>
@@ -142,7 +142,7 @@ export default function PendingAdsPage() {
               ))}
               {ads.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={8} align="center">
+                  <TableCell colSpan={9} align="center">
                     No pending ads found
                   </TableCell>
                 </TableRow>
