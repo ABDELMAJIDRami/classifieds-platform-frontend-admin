@@ -26,8 +26,6 @@ import {
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
-import ClassIcon from '@mui/icons-material/Class';
-import Link from 'next/link';
 import axios from '@/src/core/network/axios';
 import {useNotifications} from "@toolpad/core";
 import {Category} from "@/src/core/interfaces/Category";

@@ -12,24 +12,12 @@ import {
   TableContainer, 
   TableHead, 
   TableRow,
-  CircularProgress,
-  Alert
+  CircularProgress
 } from '@mui/material';
 import axios from '../../../src/core/network/axios';
 import Link from 'next/link';
 import {useNotifications} from "@toolpad/core";
-
-interface User {
-  id: number;
-  email: string;
-  firstName: string;
-  lastName: string;
-  role: {
-    name: string;
-  };
-  isActive: boolean;
-  createdAt: string;
-}
+import {User} from "@/src/core/interfaces/User";
 
 
 export default function UsersPage() {

@@ -6,5 +6,7 @@ export interface User {
   lastName: string;
   email: string;
   isActive: boolean;
-  role: Role
+  role: Role,
+  createdAt: string;
+  updatedAt: string;
 }

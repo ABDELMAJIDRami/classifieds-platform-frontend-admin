@@ -20,20 +20,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import Link from 'next/link';
 import axios from '../../../../src/core/network/axios';
 import {useNotifications} from "@toolpad/core";
-
-interface User {
-  id: number;
-  email: string;
-  firstName: string;
-  lastName: string;
-  role: {
-    id: number;
-    name: string;
-  };
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
-}
+import {User} from "@/src/core/interfaces/User";
 
 
 export default function UserDetailPage() {
@@ -49,7 +36,7 @@ export default function UserDetailPage() {
     try {
       const response = await axios.get(`/users/${userId}`);
       setUser(response.data);
-    } catch (err) {
+    } catch (e) {
       // @ts-ignore
       notifications.show(`Fetching user failed. ${e.response?.data?.message || e.message}`, {
         severity: "error",
