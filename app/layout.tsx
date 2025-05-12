@@ -1,20 +1,21 @@
 'use client';
 
 import * as React from 'react';
-import { NextAppProvider } from '@toolpad/core/nextjs';
-import { AppRouterCacheProvider } from '@mui/material-nextjs/v15-appRouter';
+import {NextAppProvider} from '@toolpad/core/nextjs';
+import {AppRouterCacheProvider} from '@mui/material-nextjs/v15-appRouter';
 import DashboardRoundedIcon from '@mui/icons-material/DashboardRounded';
 import PersonRoundedIcon from '@mui/icons-material/PersonRounded';
 import AdsClickRoundedIcon from '@mui/icons-material/AdsClickRounded';
 import CategoryRoundedIcon from '@mui/icons-material/CategoryRounded';
 
-import type { Navigation } from '@toolpad/core/AppProvider';
+import type {Navigation} from '@toolpad/core/AppProvider';
 import theme from '../theme';
 import axios from "@/src/core/network/axios";
-import { User } from "@/src/core/interfaces/User";
+import {User} from "@/src/core/interfaces/User";
 import {useRouter} from "next/navigation";
 import {useEffect} from "react";
-import {NotificationsProvider, useNotifications} from "@toolpad/core";
+import {NotificationsProvider} from "@toolpad/core";
+import { UserContext } from '@/src/core/contexts/UserContext';
 
 
 const NAVIGATION: Navigation = [
@@ -25,18 +26,18 @@ const NAVIGATION: Navigation = [
   {
     segment: '',
     title: 'Dashboard',
-    icon: <DashboardRoundedIcon />,
+    icon: <DashboardRoundedIcon/>,
   },
   {
     segment: 'users',
     title: 'Users',
-    icon: <PersonRoundedIcon />,
+    icon: <PersonRoundedIcon/>,
     pattern: 'users/(new|[0-9]+|[0-9]+/edit)',
   },
   {
     segment: 'ads',
     title: 'Ads',
-    icon: <AdsClickRoundedIcon />,
+    icon: <AdsClickRoundedIcon/>,
     pattern: 'ads/([0-9]+|[0-9]+/moderate)?',
     children: [
       {
@@ -52,7 +53,7 @@ const NAVIGATION: Navigation = [
   {
     segment: 'categories',
     title: 'Categories',
-    icon: <CategoryRoundedIcon />,
+    icon: <CategoryRoundedIcon/>,
     children: [
       {
         segment: '',
@@ -73,7 +74,8 @@ const BRANDING = {
 
 export default function RootLayout(props: { children: React.ReactNode }) {
   const router = useRouter();
-  const [user, setUser] = React.useState<User | null>(null);
+  const [user, setUser] = React.useState<User>();
+  const [isFetchingUser, setIsFetchingUser] = React.useState<boolean>(true);
 
   const fetchUser = async () => {
     try {
@@ -81,12 +83,15 @@ export default function RootLayout(props: { children: React.ReactNode }) {
       setUser(response.data);
     } catch (e) {
       console.error('Failed to load user:', e);
+    } finally {
+      setIsFetchingUser(false);
     }
   };
 
   const signOut = async () => {
     try {
       await axios.post('/auth/logout');
+      setUser(undefined)
       router.replace('/signin');
     } catch (e) {
       console.log(e)
@@ -97,28 +102,36 @@ export default function RootLayout(props: { children: React.ReactNode }) {
     fetchUser().then();
   }, []);
 
+  useEffect(() => {
+    if (!isFetchingUser && (!user || user.role.name !== 'manager')) {
+      router.push('/signin');
+    }
+  }, [isFetchingUser, user]);
+
   return (
     <html lang="en" data-toolpad-color-scheme="light" suppressHydrationWarning>
-      <body>
-        <AppRouterCacheProvider options={{ enableCssLayer: true }}>
-          <NextAppProvider
-            navigation={NAVIGATION}
-            branding={BRANDING}
-            session={user ? {user: {id: user.id, name: `${user.firstName} ${user.lastName}`, email: user.email}} : null}
-            authentication={{
-              signIn: () => {
-                router.replace('/signin')
-              },
-              signOut
-            }}
-            theme={theme}
-          >
-            <NotificationsProvider>
-              {props.children}
-            </NotificationsProvider>
-          </NextAppProvider>
-        </AppRouterCacheProvider>
-      </body>
+    <body>
+    <AppRouterCacheProvider options={{enableCssLayer: true}}>
+      <UserContext.Provider value={{user, setUser, isFetchingUser}}>
+        <NextAppProvider
+          navigation={NAVIGATION}
+          branding={BRANDING}
+          session={user ? {user: {id: user.id, name: `${user.firstName} ${user.lastName}`, email: user.email}} : null}
+          authentication={{
+            signIn: () => {
+              router.replace('/signin')
+            },
+            signOut
+          }}
+          theme={theme}
+        >
+          <NotificationsProvider>
+            {props.children}
+          </NotificationsProvider>
+        </NextAppProvider>
+      </UserContext.Provider>
+    </AppRouterCacheProvider>
+    </body>
     </html>
   );
 }

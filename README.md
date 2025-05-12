@@ -13,7 +13,7 @@ Add the CLIENT_ID and CLIENT_SECRET from your OAuth provider to the .env.local f
 
 First, run the development server: `npm run dev`
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3003](http://localhost:3000) with your browser to see the result.
 
 
 ## Deploy on Vercel
