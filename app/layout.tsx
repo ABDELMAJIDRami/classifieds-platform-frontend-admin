@@ -13,9 +13,10 @@ import theme from '../theme';
 import axios from "@/src/core/network/axios";
 import {User} from "@/src/core/interfaces/User";
 import {useRouter} from "next/navigation";
-import {useEffect} from "react";
+import {Suspense, useEffect} from "react";
 import {NotificationsProvider} from "@toolpad/core";
 import { UserContext } from '@/src/core/contexts/UserContext';
+import {Box, CircularProgress} from "@mui/material";
 
 
 const NAVIGATION: Navigation = [
@@ -111,26 +112,35 @@ export default function RootLayout(props: { children: React.ReactNode }) {
   return (
     <html lang="en" data-toolpad-color-scheme="light" suppressHydrationWarning>
     <body>
-    <AppRouterCacheProvider options={{enableCssLayer: true}}>
-      <UserContext.Provider value={{user, setUser, isFetchingUser}}>
-        <NextAppProvider
-          navigation={NAVIGATION}
-          branding={BRANDING}
-          session={user ? {user: {id: user.id, name: `${user.firstName} ${user.lastName}`, email: user.email}} : null}
-          authentication={{
-            signIn: () => {
-              router.replace('/signin')
-            },
-            signOut
-          }}
-          theme={theme}
-        >
-          <NotificationsProvider>
-            {props.children}
-          </NotificationsProvider>
-        </NextAppProvider>
-      </UserContext.Provider>
-    </AppRouterCacheProvider>
+    {/* This is needed bcz I am using useSearchParams inside PendingAdsContent */}
+    <Suspense
+      fallback={
+        <Box sx={{display: 'flex', height: '100vh', alignItems: 'center', justifyContent: 'center'}}>
+          <CircularProgress/>
+        </Box>
+      }
+    >
+      <AppRouterCacheProvider options={{enableCssLayer: true}}>
+        <UserContext.Provider value={{user, setUser, isFetchingUser}}>
+          <NextAppProvider
+            navigation={NAVIGATION}
+            branding={BRANDING}
+            session={user ? {user: {id: user.id, name: `${user.firstName} ${user.lastName}`, email: user.email}} : null}
+            authentication={{
+              signIn: () => {
+                router.replace('/signin')
+              },
+              signOut
+            }}
+            theme={theme}
+          >
+            <NotificationsProvider>
+                {props.children}
+            </NotificationsProvider>
+          </NextAppProvider>
+        </UserContext.Provider>
+      </AppRouterCacheProvider>
+    </Suspense>
     </body>
     </html>
   );
